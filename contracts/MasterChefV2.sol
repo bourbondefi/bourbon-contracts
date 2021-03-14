@@ -8,12 +8,12 @@ import "./libs/SafeBEP20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-import "./EggToken.sol";
+import "./BRRLToken.sol";
 
-// MasterChef is the master of Egg. He can make Egg and he is a fair guy.
+// MasterChef is the master of BRRL. He can make BRRL and he is a fair guy.
 //
 // Note that it's ownable and the owner wields tremendous power. The ownership
-// will be transferred to a governance smart contract once EGG is sufficiently
+// will be transferred to a governance smart contract once BRRL is sufficiently
 // distributed and the community can show to govern itself.
 //
 // Have fun reading it. Hopefully it's bug-free. God bless.
@@ -26,13 +26,13 @@ contract MasterChefV2 is Ownable, ReentrancyGuard {
         uint256 amount;         // How many LP tokens the user has provided.
         uint256 rewardDebt;     // Reward debt. See explanation below.
         //
-        // We do some fancy math here. Basically, any point in time, the amount of EGGs
+        // We do some fancy math here. Basically, any point in time, the amount of BRRLs
         // entitled to a user but is pending to be distributed is:
         //
-        //   pending reward = (user.amount * pool.accEggPerShare) - user.rewardDebt
+        //   pending reward = (user.amount * pool.accBRRLPerShare) - user.rewardDebt
         //
         // Whenever a user deposits or withdraws LP tokens to a pool. Here's what happens:
-        //   1. The pool's `accEggPerShare` (and `lastRewardBlock`) gets updated.
+        //   1. The pool's `accBRRLPerShare` (and `lastRewardBlock`) gets updated.
         //   2. User receives the pending reward sent to his/her address.
         //   3. User's `amount` gets updated.
         //   4. User's `rewardDebt` gets updated.
@@ -41,19 +41,19 @@ contract MasterChefV2 is Ownable, ReentrancyGuard {
     // Info of each pool.
     struct PoolInfo {
         IBEP20 lpToken;           // Address of LP token contract.
-        uint256 allocPoint;       // How many allocation points assigned to this pool. EGGs to distribute per block.
-        uint256 lastRewardBlock;  // Last block number that EGGs distribution occurs.
-        uint256 accEggPerShare;   // Accumulated EGGs per share, times 1e12. See below.
+        uint256 allocPoint;       // How many allocation points assigned to this pool. BRRLs to distribute per block.
+        uint256 lastRewardBlock;  // Last block number that BRRLs distribution occurs.
+        uint256 accBRRLPerShare;   // Accumulated EGGs per share, times 1e12. See below.
         uint16 depositFeeBP;      // Deposit fee in basis points
     }
 
     // The EGG TOKEN!
-    EggToken public egg;
+    BRRLToken public brrl;
     // Dev address.
     address public devaddr;
     // EGG tokens created per block.
-    uint256 public eggPerBlock;
-    // Bonus muliplier for early egg makers.
+    uint256 public brrlPerBlock;
+    // Bonus muliplier for early brrl makers.
     uint256 public constant BONUS_MULTIPLIER = 1;
     // Deposit Fee address
     address public feeAddress;
@@ -75,16 +75,16 @@ contract MasterChefV2 is Ownable, ReentrancyGuard {
     event UpdateEmissionRate(address indexed user, uint256 goosePerBlock);
 
     constructor(
-        EggToken _egg,
+        BRRLToken _brrl,
         address _devaddr,
         address _feeAddress,
-        uint256 _eggPerBlock,
+        uint256 _brrlPerBlock,
         uint256 _startBlock
     ) public {
-        egg = _egg;
+        brrl = _brrl;
         devaddr = _devaddr;
         feeAddress = _feeAddress;
-        eggPerBlock = _eggPerBlock;
+        brrlPerBlock = _brrlPerBlock;
         startBlock = _startBlock;
     }
 
@@ -111,7 +111,7 @@ contract MasterChefV2 is Ownable, ReentrancyGuard {
         lpToken : _lpToken,
         allocPoint : _allocPoint,
         lastRewardBlock : lastRewardBlock,
-        accEggPerShare : 0,
+        accBRRLPerShare : 0,
         depositFeeBP : _depositFeeBP
         }));
     }
@@ -133,17 +133,17 @@ contract MasterChefV2 is Ownable, ReentrancyGuard {
     }
 
     // View function to see pending EGGs on frontend.
-    function pendingEgg(uint256 _pid, address _user) external view returns (uint256) {
+    function pendingBRRL(uint256 _pid, address _user) external view returns (uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
-        uint256 accEggPerShare = pool.accEggPerShare;
+        uint256 accBRRLPerShare = pool.accBRRLPerShare;
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
         if (block.number > pool.lastRewardBlock && lpSupply != 0) {
             uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-            uint256 eggReward = multiplier.mul(eggPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-            accEggPerShare = accEggPerShare.add(eggReward.mul(1e12).div(lpSupply));
+            uint256 brrlReward = multiplier.mul(brrlPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+            accBRRLPerShare = accBRRLPerShare.add(brrlReward.mul(1e12).div(lpSupply));
         }
-        return user.amount.mul(accEggPerShare).div(1e12).sub(user.rewardDebt);
+        return user.amount.mul(accBRRLPerShare).div(1e12).sub(user.rewardDebt);
     }
 
     // Update reward variables for all pools. Be careful of gas spending!
@@ -166,10 +166,10 @@ contract MasterChefV2 is Ownable, ReentrancyGuard {
             return;
         }
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-        uint256 eggReward = multiplier.mul(eggPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-        egg.mint(devaddr, eggReward.div(10));
-        egg.mint(address(this), eggReward);
-        pool.accEggPerShare = pool.accEggPerShare.add(eggReward.mul(1e12).div(lpSupply));
+        uint256 brrlReward = multiplier.mul(brrlPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+        brrl.mint(devaddr, brrlReward.div(10));
+        brrl.mint(address(this), brrlReward);
+        pool.accBRRLPerShare = pool.accBRRLPerShare.add(brrlReward.mul(1e12).div(lpSupply));
         pool.lastRewardBlock = block.number;
     }
 
@@ -179,9 +179,9 @@ contract MasterChefV2 is Ownable, ReentrancyGuard {
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
         if (user.amount > 0) {
-            uint256 pending = user.amount.mul(pool.accEggPerShare).div(1e12).sub(user.rewardDebt);
+            uint256 pending = user.amount.mul(pool.accBRRLPerShare).div(1e12).sub(user.rewardDebt);
             if (pending > 0) {
-                safeEggTransfer(msg.sender, pending);
+                safeBRRLTransfer(msg.sender, pending);
             }
         }
         if (_amount > 0) {
@@ -194,7 +194,7 @@ contract MasterChefV2 is Ownable, ReentrancyGuard {
                 user.amount = user.amount.add(_amount);
             }
         }
-        user.rewardDebt = user.amount.mul(pool.accEggPerShare).div(1e12);
+        user.rewardDebt = user.amount.mul(pool.accBRRLPerShare).div(1e12);
         emit Deposit(msg.sender, _pid, _amount);
     }
 
@@ -204,15 +204,15 @@ contract MasterChefV2 is Ownable, ReentrancyGuard {
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(_pid);
-        uint256 pending = user.amount.mul(pool.accEggPerShare).div(1e12).sub(user.rewardDebt);
+        uint256 pending = user.amount.mul(pool.accBRRLPerShare).div(1e12).sub(user.rewardDebt);
         if (pending > 0) {
-            safeEggTransfer(msg.sender, pending);
+            safeBRRLTransfer(msg.sender, pending);
         }
         if (_amount > 0) {
             user.amount = user.amount.sub(_amount);
             pool.lpToken.safeTransfer(address(msg.sender), _amount);
         }
-        user.rewardDebt = user.amount.mul(pool.accEggPerShare).div(1e12);
+        user.rewardDebt = user.amount.mul(pool.accBRRLPerShare).div(1e12);
         emit Withdraw(msg.sender, _pid, _amount);
     }
 
@@ -227,16 +227,16 @@ contract MasterChefV2 is Ownable, ReentrancyGuard {
         emit EmergencyWithdraw(msg.sender, _pid, amount);
     }
 
-    // Safe egg transfer function, just in case if rounding error causes pool to not have enough EGGs.
-    function safeEggTransfer(address _to, uint256 _amount) internal {
-        uint256 eggBal = egg.balanceOf(address(this));
+    // Safe brrl transfer function, just in case if rounding error causes pool to not have enough EGGs.
+    function safeBRRLTransfer(address _to, uint256 _amount) internal {
+        uint256 brrlBal = brrl.balanceOf(address(this));
         bool transferSuccess = false;
-        if (_amount > eggBal) {
-            transferSuccess = egg.transfer(_to, eggBal);
+        if (_amount > brrlBal) {
+            transferSuccess = brrl.transfer(_to, brrlBal);
         } else {
-            transferSuccess = egg.transfer(_to, _amount);
+            transferSuccess = brrl.transfer(_to, _amount);
         }
-        require(transferSuccess, "safeEggTransfer: transfer failed");
+        require(transferSuccess, "safeBRRLTransfer: transfer failed");
     }
 
     // Update dev address by the previous dev.
@@ -253,9 +253,9 @@ contract MasterChefV2 is Ownable, ReentrancyGuard {
     }
 
     //Pancake has to add hidden dummy pools inorder to alter the emission, here we make it simple and transparent to all.
-    function updateEmissionRate(uint256 _eggPerBlock) public onlyOwner {
+    function updateEmissionRate(uint256 _brrlPerBlock) public onlyOwner {
         massUpdatePools();
-        eggPerBlock = _eggPerBlock;
-        emit UpdateEmissionRate(msg.sender, _eggPerBlock);
+        brrlPerBlock = _brrlPerBlock;
+        emit UpdateEmissionRate(msg.sender, _brrlPerBlock);
     }
 }
