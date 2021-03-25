@@ -1,12 +1,15 @@
-# Goose Finance
+# Bourbon Finance
 
-https://goosedefi.com Feel free to read the code. More details coming soon.
+https://bourbondefi.com Feel free to read the code. More details coming soon.
 
 ## Deployed Contracts / Hash
 
 ### BSCMAINNET
 
-- EggToken - https://bscscan.com/token/0xf952fc3ca7325cc27d15885d37117676d25bfda6
-- MasterChef - https://bscscan.com/address/0xe70E9185F5ea7Ba3C5d63705784D8563017f2E57
-- Timelock - https://bscscan.com/address/0x2Ef488DE034567e9B8D312928fD52812A242aB3A
-- MultiCall - https://bscscan.com/address/0x1ee38d535d541c55c9dae27b12edf090c608e6fb
+MasterShepherd https://bscscan.com/token/0xA893176a721587Daed3575bB25906fA06dD26817
+
+Bourbon Barrel Token https://bscscan.com/token/0xcbe73dd7E8FC74011136b837a59205801c45e6A1
+
+TimeLock https://bscscan.com/token/0xbead24e0a5b86021e24a1cf691509f8263ea0922
+
+MultiCall https://bscscan.com/token/0xAf1CD7D6Cb2B7E2805fa1Fb2c589654DEBa86A56

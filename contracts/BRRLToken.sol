@@ -1,22 +1,23 @@
+// SPDX-License-Identifier: MIT License
 pragma solidity 0.6.12;
 
-import "./libs/BEP20.sol";
+import "./BEP20.sol";
 
-// BRRLToken with Governance.
-contract BRRLToken is BEP20('Bourbon Barrel', 'BRRL') {
-    /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (MasterChef).
+// BrrlToken with Governance.
+contract BrrlToken is BEP20('Bourbon Barrel Token', 'BRRL') {
+    /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (Shepherd).
     function mint(address _to, uint256 _amount) public onlyOwner {
         _mint(_to, _amount);
         _moveDelegates(address(0), _delegates[_to], _amount);
     }
-
+        
     // Copied and modified from YAM code:
     // https://github.com/yam-finance/yam-protocol/blob/master/contracts/token/YAMGovernanceStorage.sol
     // https://github.com/yam-finance/yam-protocol/blob/master/contracts/token/YAMGovernance.sol
     // Which is copied and modified from COMPOUND:
     // https://github.com/compound-finance/compound-protocol/blob/master/contracts/Governance/Comp.sol
 
-    /// @notice A record of each accounts delegate
+    /// @dev @notice A record of each accounts delegate
     mapping (address => address) internal _delegates;
 
     /// @notice A checkpoint for marking number of votes from a given block
