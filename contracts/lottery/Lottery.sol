@@ -3,8 +3,8 @@ pragma solidity 0.6.12;
 import "./LotteryNFT.sol";
 import "../libs/IBEP20.sol";
 import "../libs/SafeBEP20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "./SafeMath.sol";
+import "./OwnableUpgradeable.sol";
 
 // 4 numbers
 contract Lottery is OwnableUpgradeable {
