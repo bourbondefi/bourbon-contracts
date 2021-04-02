@@ -1,9 +1,9 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "./ERC721/ERC721.sol";
+import "./Counters.sol";
+import "./Ownable.sol";
 
 contract LotteryNFT is ERC721, Ownable {
     using Counters for Counters.Counter;
@@ -14,7 +14,7 @@ contract LotteryNFT is ERC721, Ownable {
     mapping (uint256 => uint256) public issueIndex;
     mapping (uint256 => bool) public claimInfo;
 
-    constructor() public ERC721("GoldenGoose Lottery Ticket", "GLT") {}
+    constructor() public ERC721("Bourbon Barrel Lottery Ticket", "BBLT") {}
 
     function newLotteryItem(address player, uint8[4] memory _lotteryNumbers, uint256 _amount, uint256 _issueIndex)
         external onlyOwner
