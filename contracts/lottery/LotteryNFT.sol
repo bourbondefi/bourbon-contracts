@@ -1,7 +1,7 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
-import "./ERC721/ERC721.sol";
+import "./ERC721.sol";
 import "./Counters.sol";
 import "./Ownable.sol";
 

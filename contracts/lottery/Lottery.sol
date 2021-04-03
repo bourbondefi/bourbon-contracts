@@ -1,8 +1,8 @@
 pragma solidity 0.6.12;
 
 import "./LotteryNFT.sol";
-import "../libs/IBEP20.sol";
-import "../libs/SafeBEP20.sol";
+import "./IBEP20.sol";
+import "./SafeBEP20.sol";
 import "./SafeMath.sol";
 import "./OwnableUpgradeable.sol";
 
