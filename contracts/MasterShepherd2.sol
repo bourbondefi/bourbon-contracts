@@ -6,11 +6,11 @@ import './IBEP20.sol';
 import './SafeBEP20.sol';
 import './Ownable.sol';
 
-import "./BrrlToken.sol";
+import "./RareBourbonToken.sol";
 
 //
 // Note that it's ownable and the owner wields tremendous power. The ownership
-// will be transferred to a governance smart contract once BRRL is sufficiently
+// will be transferred to a governance smart contract once RBT is sufficiently
 // distributed and the community can show to govern itself.
 //
 contract MasterShepherd is Ownable {
@@ -22,13 +22,13 @@ contract MasterShepherd is Ownable {
         uint256 amount;     // How many LP tokens the user has provided.
         uint256 rewardDebt; // Reward debt. See explanation below.
         //
-        // We do some fancy math here. Basically, any point in time, the amount of BRRLs
+        // We do some fancy math here. Basically, any point in time, the amount of RBTs
         // entitled to a user but is pending to be distributed is:
         //
-        //   pending reward = (user.amount * pool.accBrrlPerShare) - user.rewardDebt
+        //   pending reward = (user.amount * pool.accRbtPerShare) - user.rewardDebt
         //
         // Whenever a user deposits or withdraws LP tokens to a pool. Here's what happens:
-        //   1. The pool's `accBrrlPerShare` (and `lastRewardBlock`) gets updated.
+        //   1. The pool's `accRbtPerShare` (and `lastRewardBlock`) gets updated.
         //   2. User receives the pending reward sent to his/her address.
         //   3. User's `amount` gets updated.
         //   4. User's `rewardDebt` gets updated.
@@ -37,19 +37,19 @@ contract MasterShepherd is Ownable {
     // Info of each pool.
     struct PoolInfo {
         IBEP20 lpToken;           // Address of LP token contract.
-        uint256 allocPoint;       // How many allocation points assigned to this pool. BRRLs to distribute per block.
-        uint256 lastRewardBlock;  // Last block number that BRRLs distribution occurs.
-        uint256 accBrrlPerShare;   // Accumulated BRRLs per share, times 1e12. See below.
+        uint256 allocPoint;       // How many allocation points assigned to this pool. RBTs to distribute per block.
+        uint256 lastRewardBlock;  // Last block number that RBTs distribution occurs.
+        uint256 accRbtPerShare;   // Accumulated RBTs per share, times 1e12. See below.
         uint16 depositFeeBP;      // Deposit fee in basis points
     }
 
-    // The BRRL TOKEN
-    BrrlToken public brrl;    
+    // The RBT TOKEN
+    RbtToken public rbt;    
     // Dev address.
     address public devaddr;
-    // BRRL tokens created per block.
-    uint256 public brrlPerBlock;
-    // Bonus muliplier for early brrl makers.
+    // RBT tokens created per block.
+    uint256 public rbtPerBlock;
+    // Bonus muliplier for early rbt makers.
     uint256 public BONUS_MULTIPLIER = 1;
     // The maximum deposit fee allowed is 10%
     uint16 public MAX_DEPOSIT_FEE = 1000;
@@ -62,7 +62,7 @@ contract MasterShepherd is Ownable {
     mapping (uint256 => mapping (address => UserInfo)) public userInfo;
     // Total allocation points. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
-    // The block number when BRRL mining starts.
+    // The block number when RBT mining starts.
     uint256 public startBlock;
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
@@ -70,15 +70,15 @@ contract MasterShepherd is Ownable {
     event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
 
     constructor(
-        BrrlToken _brrl,        
+        RbtToken _rbt,        
         address _devaddr,
         address _feeAddress,
-        uint256 _brrlPerBlock       
+        uint256 _rbtPerBlock       
     ) public {
-        brrl = _brrl;
+        rbt = _rbt;
         devaddr = _devaddr;
         feeAddress = _feeAddress;
-        brrlPerBlock = _brrlPerBlock;                
+        rbtPerBlock = _rbtPerBlock;                
     }
     
     function poolLength() external view returns (uint256) {
@@ -104,7 +104,7 @@ contract MasterShepherd is Ownable {
             lpToken: _lpToken,
             allocPoint: _allocPoint,
             lastRewardBlock: lastRewardBlock,
-            accBrrlPerShare: 0,
+            accRbtPerShare: 0,
             depositFeeBP: _depositFeeBP
         }));        
     }
@@ -117,7 +117,7 @@ contract MasterShepherd is Ownable {
         }
     }
 
-    // Update the given pool's BRRL allocation point and deposit fee. Can only be called by the owner.
+    // Update the given pool's RBT allocation point and deposit fee. Can only be called by the owner.
     function set(uint256 _pid, uint256 _allocPoint, uint16 _depositFeeBP, bool _withUpdate) public onlyOwner validatePool(_pid) {
         require(_depositFeeBP <= MAX_DEPOSIT_FEE, "set: invalid deposit fee basis points");
         if (_withUpdate) {
@@ -133,18 +133,18 @@ contract MasterShepherd is Ownable {
         return _to.sub(_from).mul(BONUS_MULTIPLIER);
     }
         
-    // View function to see pending BRRLs on frontend.
-    function pendingBrrl(uint256 _pid, address _user) external view returns (uint256) {
+    // View function to see pending RBTs on frontend.
+    function pendingRbt(uint256 _pid, address _user) external view returns (uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
-        uint256 accBrrlPerShare = pool.accBrrlPerShare;
+        uint256 accRbtPerShare = pool.accRbtPerShare;
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
         if (block.number > pool.lastRewardBlock && lpSupply != 0) {
             uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-            uint256 brrlReward = multiplier.mul(brrlPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-            accBrrlPerShare = accBrrlPerShare.add(brrlReward.mul(1e12).div(lpSupply));
+            uint256 rbtReward = multiplier.mul(rbtPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+            accRbtPerShare = accRbtPerShare.add(rbtReward.mul(1e12).div(lpSupply));
         }
-        return user.amount.mul(accBrrlPerShare).div(1e12).sub(user.rewardDebt);
+        return user.amount.mul(accRbtPerShare).div(1e12).sub(user.rewardDebt);
     }
 
     // Update reward variables for all pools. Be careful of gas spending!
@@ -168,23 +168,23 @@ contract MasterShepherd is Ownable {
             return;
         }
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-        uint256 brrlReward = multiplier.mul(brrlPerBlock).mul(pool.allocPoint).div(totalAllocPoint);                
-        brrl.mint(devaddr, brrlReward.div(10));
-        brrl.mint(address(this), brrlReward);
-        pool.accBrrlPerShare = pool.accBrrlPerShare.add(brrlReward.mul(1e12).div(lpSupply));
+        uint256 rbtReward = multiplier.mul(rbtPerBlock).mul(pool.allocPoint).div(totalAllocPoint);                
+        rbt.mint(devaddr, rbtReward.div(10));
+        rbt.mint(address(this), rbtReward);
+        pool.accRbtPerShare = pool.accRbtPerShare.add(rbtReward.mul(1e12).div(lpSupply));
         pool.lastRewardBlock = block.number;
     }
 
-    // Deposit LP tokens to MasterChef for BRRL allocation.
+    // Deposit LP tokens to MasterChef for RBT allocation.
     function deposit(uint256 _pid, uint256 _amount) public {        
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
 
         if (user.amount > 0) {
-            uint256 pending = user.amount.mul(pool.accBrrlPerShare).div(1e12).sub(user.rewardDebt);
+            uint256 pending = user.amount.mul(pool.accRbtPerShare).div(1e12).sub(user.rewardDebt);
             if(pending > 0) {
-                safeBrrlTransfer(msg.sender, pending);
+                safeRbtTransfer(msg.sender, pending);
             }
         }
         if (_amount > 0) {
@@ -197,7 +197,7 @@ contract MasterShepherd is Ownable {
                 user.amount = user.amount.add(_amount);
             }
         }
-        user.rewardDebt = user.amount.mul(pool.accBrrlPerShare).div(1e12);
+        user.rewardDebt = user.amount.mul(pool.accRbtPerShare).div(1e12);
         emit Deposit(msg.sender, _pid, _amount);
     }
 
@@ -207,15 +207,15 @@ contract MasterShepherd is Ownable {
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(_pid);
-        uint256 pending = user.amount.mul(pool.accBrrlPerShare).div(1e12).sub(user.rewardDebt);
+        uint256 pending = user.amount.mul(pool.accRbtPerShare).div(1e12).sub(user.rewardDebt);
         if(pending > 0) {
-            safeBrrlTransfer(msg.sender, pending);
+            safeRbtTransfer(msg.sender, pending);
         }
         if(_amount > 0) {
             user.amount = user.amount.sub(_amount);
             pool.lpToken.safeTransfer(address(msg.sender), _amount);
         }
-        user.rewardDebt = user.amount.mul(pool.accBrrlPerShare).div(1e12);
+        user.rewardDebt = user.amount.mul(pool.accRbtPerShare).div(1e12);
         emit Withdraw(msg.sender, _pid, _amount);
     }
     
@@ -230,13 +230,13 @@ contract MasterShepherd is Ownable {
         emit EmergencyWithdraw(msg.sender, _pid, amount);
     }
 
-    // Safe brrl transfer function, just in case if rounding error causes pool to not have enough BRRLs.
-    function safeBrrlTransfer(address _to, uint256 _amount) internal {
-        uint256 brrlBal = brrl.balanceOf(address(this));
-        if (_amount > brrlBal) {
-            brrl.transfer(_to, brrlBal);
+    // Safe rbt transfer function, just in case if rounding error causes pool to not have enough RBTs.
+    function safeRbtTransfer(address _to, uint256 _amount) internal {
+        uint256 rbtBal = rbt.balanceOf(address(this));
+        if (_amount > rbtBal) {
+            rbt.transfer(_to, rbtBal);
         } else {
-            brrl.transfer(_to, _amount);
+            rbt.transfer(_to, _amount);
         }
     }
     modifier validatePool(uint256 _pid) {
@@ -249,9 +249,9 @@ contract MasterShepherd is Ownable {
         BONUS_MULTIPLIER = _multiplierNumber;
     }
     
-    function updateBrrlPerBlock(uint256 _brrlPerBlock) external onlyOwner {        
+    function updateRbtPerBlock(uint256 _rbtPerBlock) external onlyOwner {        
         massUpdatePools();
-        brrlPerBlock = _brrlPerBlock;
+        rbtPerBlock = _rbtPerBlock;
     }
                               
     // Update dev address by the previous dev.
