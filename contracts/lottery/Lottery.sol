@@ -63,7 +63,23 @@ contract Lottery is OwnableUpgradeable {
     event SetAdmin(address indexed user, address indexed admin);
     event SetAllocation(address indexed user, uint8 allocation1, uint8 allocation2, uint8 allocation3);
 
-    constructor() public {
+    constructor(
+        address _brrl,
+        address _adminAddress,
+        address _lottery,
+        uint256 _minPrice,
+        uint8 _maxNumber,
+        address _adminAddress
+
+ ) public {
+
+     brrl = _brrl;
+     adminAddress = _adminAddress;
+     LotteryNFT = _lottery;
+     minPrice = _minPrice;
+     maxNumber = _maxNumer;
+     adminAddress = _adminAddress;
+
     }
 
     function initialize(
